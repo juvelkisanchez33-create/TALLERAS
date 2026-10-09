@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TALLER AS - Control de Ingresos</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5a4bcf;
+            --bg: #f4f5f9;
+            --card-bg: #ffffff;
+            --text-dark: #2d3436;
+            --text-muted: #636e72;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-dark);
+            padding-bottom: 80px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary), #a29bfe);
+            color: white;
+            padding: 25px 20px 35px 20px;
+            border-bottom-left-radius: 25px;
+            border-bottom-right-radius: 25px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        /* Container */
+        .container {
+            padding: 0 15px;
+            margin-top: -20px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Progress Bar */
+        .meta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .meta-porcentaje {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .meta-monto {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .progress-bar-bg {
+            background-color: #e0e0e0;
+            height: 12px;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            background-color: var(--primary);
+            height: 100%;
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        /* Grid Metrics */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .metric-box {
+            background: var(--card-bg);
+            padding: 14px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .metric-box small {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .metric-box h3 {
+            font-size: 18px;
+            margin-top: 5px;
+        }
+
+        /* Action Buttons */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-light {
+            background-color: #eeeafc;
+            color: var(--primary);
+        }
+
+        .btn-danger-outline {
+            background: transparent;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 6px;
+        }
+
+        .btn-success-outline {
+            background: transparent;
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 6px;
+        }
+
+        /* List Item */
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item-info span {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .item-info small {
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        /* Modal Simple */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 18px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 15px;
+        }
+
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+
+        /* Bottom Nav */
+        .nav-bar {
+            position: fixed;
+            bottom: 0; width: 100%;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-item {
+            text-align: center;
+            font-size: 10px;
+            color: var(--text-muted);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>TALLER AS</h1>
+        <p>Control de ingresos</p>
+    </div>
+
+    <div class="container">
+
+        <!-- VISTA DE INICIO -->
+        <div id="view-inicio">
+            <!-- Quincena Card -->
+            <div class="card" style="margin-top: 10px;">
+                <div class="card-title">
+                    <span>META QUINCENAL</span>
+                    <span id="txtRangoMeta">1-15/10/2026</span>
+                </div>
+                <div class="meta-header">
+                    <span class="meta-porcentaje" id="txtPorcentaje">0%</span>
+                    <span class="meta-monto" id="txtMontoMeta">₡0 / ₡190.000</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="barProgreso"></div>
+                </div>
+                <small style="color: var(--text-muted);" id="txtFaltante">Faltan ₡190.000 para alcanzar la meta.</small>
+            </div>
+
+            <!-- Métricas Hoy -->
+            <div class="grid-2">
+                <div class="metric-box">
+                    <small>TRABAJOS DE HOY</small>
+                    <h3 id="txtTrabajosHoy">0</h3>
+                </div>
+                <div class="metric-box">
+                    <small>COBRADO HOY</small>
+                    <h3 id="txtCobradoHoy">₡0</h3>
+                </div>
+                <div class="metric-box">
+                    <small>PENDIENTE DE COBRO</small>
+                    <h3 id="txtPendienteTotal" style="color: var(--danger);">₡0</h3>
+                </div>
+                <div class="metric-box">
+                    <small>GASTOS HOY</small>
+                    <h3 id="txtGastosHoy">₡0</h3>
+                </div>
+            </div>
+
+            <!-- Botones Acción -->
+            <div class="actions-grid">
+                <button class="btn btn-primary" onclick="abrirModalTrabajo()">+ NUEVO TRABAJO</button>
+                <button class="btn btn-light" onclick="abrirModalGasto()">+ GASTO</button>
+            </div>
+
+            <!-- Trabajos de Hoy -->
+            <div class="card">
+                <div class="card-title">
+                    <span>Trabajos de hoy</span>
+                    <span id="txtFechaHoy">--/--</span>
+                </div>
+                <div id="listaTrabajosHoy">
+                    <p style="text-align: center; color: var(--text-muted); font-size: 13px;">Todavía no hay trabajos registrados.</p>
+                </div>
+            </div>
+
+            <!-- Resumen Dinero -->
+            <div class="card">
+                <div class="card-title">Resumen de dinero</div>
+                <div class="item-row">
+                    <span>Ingresos cobrados</span>
+                    <strong id="txtResumenCobrado">₡0</strong>
+                </div>
+                <div class="item-row">
+                    <span>Gastos</span>
+                    <strong id="txtResumenGastos" style="color: var(--danger);">- ₡0</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA DE REPORTES -->
+        <div id="view-reportes" style="display: none; margin-top: 10px;">
+            <div class="card">
+                <div class="card-title">📅 Resumen Mensual / Acumulado</div>
+                <div class="item-row">
+                    <span>Ingresos Cobrados</span>
+                    <strong id="repCobrado">₡0</strong>
+                </div>
+                <div class="item-row">
+                    <span>Gastos</span>
+                    <strong id="repGastos">₡0</strong>
+                </div>
+                <div class="item-row">
+                    <span>Disponible (Neto)</span>
+                    <strong id="repDisponible" style="color: var(--success);">₡0</strong>
+                </div>
+            </div>
+
+            <!-- Lista de Pendientes Activos con opción de eliminar/cobrar -->
+            <div class="card">
+                <div class="card-title">📌 Trabajos Pendientes de Cobro</div>
+                <div id="listaPendientesGlobal"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL NUEVO TRABAJO -->
+    <div class="modal" id="modalTrabajo">
+        <div class="modal-content">
+            <h3>Nuevo Trabajo</h3>
+            <input type="text" id="inputDescTrabajo" placeholder="Descripción (ej. Cambio de aceite)">
+            <input type="number" id="inputMontoTrabajo" placeholder="Monto (₡)">
+            <select id="selectEstadoTrabajo">
+                <option value="Cobrado">Cobrado</option>
+                <option value="Pendiente">Pendiente de Cobro</option>
+            </select>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" style="flex:1;" onclick="guardarTrabajo()">Guardar</button>
+                <button class="btn btn-light" style="flex:1;" onclick="cerrarModales()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NUEVO GASTO -->
+    <div class="modal" id="modalGasto">
+        <div class="modal-content">
+            <h3>Registrar Gasto</h3>
+            <input type="text" id="inputDescGasto" placeholder="Descripción del gasto">
+            <input type="number" id="inputMontoGasto" placeholder="Monto (₡)">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" style="flex:1;" onclick="guardarGasto()">Guardar</button>
+                <button class="btn btn-light" style="flex:1;" onclick="cerrarModales()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRA DE NAVEGACIÓN -->
+    <div class="nav-bar">
+        <div class="nav-item active" id="nav-inicio" onclick="cambiarTab('inicio')">
+            🏠<br>Inicio
+        </div>
+        <div class="nav-item" id="nav-reportes" onclick="cambiarTab('reportes')">
+            📊<br>Reportes
+        </div>
+    </div>
+
+    <script>
+        const META_QUINCENAL = 190000;
+
+        let db = JSON.parse(localStorage.getItem('taller_as_db')) || {
+            trabajos: [],
+            gastos: []
+        };
+
+        function guardarBD() {
+            localStorage.setItem('taller_as_db', JSON.stringify(db));
+            actualizarInterfaz();
+        }
+
+        function obtenerFechaHoy() {
+            const hoy = new Date();
+            return hoy.toISOString().split('T')[0];
+        }
+
+        function render() {
+            actualizarInterfaz();
+        }
+
+        function actualizarInterfaz() {
+            const hoyStr = obtenerFechaHoy();
+            document.getElementById('txtFechaHoy').innerText = new Date().toLocaleDateString('es-CR', { day: 'numeric', month: 'short' });
+
+            // Filtrar Trabajos
+            const trabajosHoy = db.trabajos.filter(t => t.fecha === hoyStr);
+            const cobradoHoy = trabajosHoy.filter(t => t.estado === 'Cobrado').reduce((sum, t) => sum + t.monto, 0);
+            
+            // Pendientes Totales
+            const pendientesTotales = db.trabajos.filter(t => t.estado === 'Pendiente');
+            const montoPendienteTotal = pendientesTotales.reduce((sum, t) => sum + t.monto, 0);
+
+            // Gastos
+            const gastosHoy = db.gastos.filter(g => g.fecha === hoyStr).reduce((sum, g) => sum + g.monto, 0);
+            const totalGastosAcumulados = db.gastos.reduce((sum, g) => sum + g.monto, 0);
+            const totalCobradoAcumulado = db.trabajos.filter(t => t.estado === 'Cobrado').reduce((sum, t) => sum + t.monto, 0);
+
+            // Métricas Inicio
+            document.getElementById('txtTrabajosHoy').innerText = trabajosHoy.length;
+            document.getElementById('txtCobradoHoy').innerText = `₡${cobradoHoy.toLocaleString()}`;
+            document.getElementById('txtPendienteTotal').innerText = `₡${montoPendienteTotal.toLocaleString()}`;
+            document.getElementById('txtGastosHoy').innerText = `₡${gastosHoy.toLocaleString()}`;
+            document.getElementById('txtResumenCobrado').innerText = `₡${cobradoHoy.toLocaleString()}`;
+            document.getElementById('txtResumenGastos').innerText = `- ₡${gastosHoy.toLocaleString()}`;
+
+            // --- LÓGICA DE LA META (Restando Gastos) ---
+            const disponibleNeto = totalCobradoAcumulado - totalGastosAcumulados;
+            const disponibleLimpio = disponibleNeto > 0 ? disponibleNeto : 0;
+            let faltante = META_QUINCENAL - disponibleLimpio;
+            if (faltante < 0) faltante = 0;
+
+            let porcentaje = Math.min(100, Math.round((disponibleLimpio / META_QUINCENAL) * 100));
+
+            document.getElementById('txtPorcentaje').innerText = `${porcentaje}%`;
+            document.getElementById('txtMontoMeta').innerText = `₡${disponibleLimpio.toLocaleString()} / ₡${META_QUINCENAL.toLocaleString()}`;
+            document.getElementById('barProgreso').style.width = `${porcentaje}%`;
+            document.getElementById('txtFaltante').innerText = `Faltan ₡${faltante.toLocaleString()} para alcanzar la meta.`;
+
+            // Render Lista de Hoy
+            const contenedorHoy = document.getElementById('listaTrabajosHoy');
+            contenedorHoy.innerHTML = '';
+            if (trabajosHoy.length === 0) {
+                contenedorHoy.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 13px;">Todavía no hay trabajos registrados.</p>';
+            } else {
+                trabajosHoy.forEach(item => {
+                    contenedorHoy.appendChild(crearFilaTrabajo(item));
+                });
+            }
+
+            // Render Reportes
+            document.getElementById('repCobrado').innerText = `₡${totalCobradoAcumulado.toLocaleString()}`;
+            document.getElementById('repGastos').innerText = `₡${totalGastosAcumulados.toLocaleString()}`;
+            document.getElementById('repDisponible').innerText = `₡${(totalCobradoAcumulado - totalGastosAcumulados).toLocaleString()}`;
+
+            // Render Pendientes Globales
+            const contenedorPendientes = document.getElementById('listaPendientesGlobal');
+            contenedorPendientes.innerHTML = '';
+            if (pendientesTotales.length === 0) {
+                contenedorPendientes.innerHTML = '<p style="font-size: 13px; color: var(--text-muted);">No hay pendientes acumulados.</p>';
+            } else {
+                pendientesTotales.forEach(item => {
+                    contenedorPendientes.appendChild(crearFilaTrabajo(item));
+                });
+            }
+        }
+
+        function crearFilaTrabajo(item) {
+            const div = document.createElement('div');
+            div.className = 'item-row';
+            
+            const badgeColor = item.estado === 'Cobrado' ? '#2ecc71' : '#e74c3c';
+
+            div.innerHTML = `
+                <div class="item-info">
+                    <span>${item.descripcion}</span>
+                    <small style="color:${badgeColor}">${item.estado} • ₡${item.monto.toLocaleString()}</small>
+                </div>
+                <div class="item-actions">
+                    ${item.estado === 'Pendiente' ? `<button class="btn-success-outline" onclick="marcarCobrado(${item.id})">Cobrar</button>` : ''}
+                    <button class="btn-danger-outline" onclick="eliminarTrabajo(${item.id})">Eliminar</button>
+                </div>
+            `;
+            return div;
+        }
+
+        // Acciones
+        function abrirModalTrabajo() { document.getElementById('modalTrabajo').style.display = 'flex'; }
+        function abrirModalGasto() { document.getElementById('modalGasto').style.display = 'flex'; }
+        function cerrarModales() {
+            document.getElementById('modalTrabajo').style.display = 'none';
+            document.getElementById('modalGasto').style.display = 'none';
+        }
+
+        function guardarTrabajo() {
+            const desc = document.getElementById('inputDescTrabajo').value;
+            const monto = parseFloat(document.getElementById('inputMontoTrabajo').value);
+            const estado = document.getElementById('selectEstadoTrabajo').value;
+
+            if (!desc || !monto) return alert('Completa los campos');
+
+            db.trabajos.push({
+                id: Date.now(),
+                descripcion: desc,
+                monto: monto,
+                estado: estado,
+                fecha: obtenerFechaHoy()
+            });
+
+            document.getElementById('inputDescTrabajo').value = '';
+            document.getElementById('inputMontoTrabajo').value = '';
+            cerrarModales();
+            guardarBD();
+        }
+
+        function guardarGasto() {
+            const desc = document.getElementById('inputDescGasto').value;
+            const monto = parseFloat(document.getElementById('inputMontoGasto').value);
+
+            if (!desc || !monto) return alert('Completa los campos');
+
+            db.gastos.push({
+                id: Date.now(),
+                descripcion: desc,
+                monto: monto,
+                fecha: obtenerFechaHoy()
+            });
+
+            document.getElementById('inputDescGasto').value = '';
+            document.getElementById('inputMontoGasto').value = '';
+            cerrarModales();
+            guardarBD();
+        }
+
+        function marcarCobrado(id) {
+            const t = db.trabajos.find(x => x.id === id);
+            if (t) {
+                t.estado = 'Cobrado';
+                guardarBD();
+            }
+        }
+
+        function eliminarTrabajo(id) {
+            db.trabajos = db.trabajos.filter(x => x.id !== id);
+            guardarBD();
+        }
+
+        function cambiarTab(tab) {
+            document.getElementById('view-inicio').style.display = tab === 'inicio' ? 'block' : 'none';
+            document.getElementById('view-reportes').style.display = tab === 'reportes' ? 'block' : 'none';
+            document.getElementById('nav-inicio').classList.toggle('active', tab === 'inicio');
+            document.getElementById('nav-reportes').classList.toggle('active', tab === 'reportes');
+        }
+
+        // Carga inicial
+        actualizarInterfaz();
+    </script>
+</body>
+</html>
